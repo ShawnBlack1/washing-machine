@@ -1,0 +1,28 @@
+ class DetailsStudentView(View):
+      def get(self,request, student_id):
+        student = Student.objects.get(pk=student_id)
+        userStudent = User.objects.get(pk=student_id)
+        form_student = StudentForm(request.POST or None, instance=student)
+        form_user = StudentUserUpdate(None,instance=userStudent)
+        return render(request, "details.html",{'form_student':form_student, 'form_user':form_user})
+      
+  def post(self,request,student_id):
+    form_student = StudentForm(request.POST, request.FILES)
+    if form_student.is_valid():
+        user = User.objects.get(pk=student_id)
+        email = form_student.cleaned_data['email']
+        user.email = email
+        user.save()
+        student = Student.objects.get(pk=student_id)
+        student.first_name = form_student.cleaned_data['first_name']
+        student.last_name = form_student.cleaned_data['last_name']
+        student.Phone = form_student.cleaned_data['Phone']
+        img = request.POST.get('imag_profile')
+        if img != None:
+          student.imag_profile = img
+        student.ID = form_student.cleaned_data['ID']
+        student.save()
+        return redirect('HomePage:home')
+    userStudent = User.objects.get(pk=student_id)
+    form_user = StudentUserUpdate(None,instance=userStudent)   
+    return render(request,'details.html',{'form_student':form_student, 'form_user':form_user})  
